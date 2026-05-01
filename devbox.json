@@ -2,6 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.17.1/.schema/devbox.schema.json",
   "packages": [
     "go@latest",
+    "gow@latest",
+    "gopls@latest",
+    "gofumpt@latest",
+    "golangci-lint@latest",
+    "gotools@latest",
     "git-ps-rs@latest"
   ],
   "shell": {

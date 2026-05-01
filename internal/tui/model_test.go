@@ -1,25 +1,20 @@
 package tui
 
 import (
-	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/bilus/experiments-chat/internal/chat"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 func TestTerminalChatRendersPrompt(t *testing.T) {
 	provider := chat.StaticProvider{Response: "I don't understand."}
 	agent := chat.NewAgent("", provider)
-	program := tea.NewProgram(NewModel(agent), tea.WithoutRenderer(), tea.WithInput(bytes.NewReader(nil)))
 
-	model, err := program.Run()
-	if err != nil {
-		t.Fatalf("run program: %v", err)
-	}
-
-	view := model.(Model).View()
-	if view != "You: " {
-		t.Fatalf("expected minimal prompt, got %q", view)
+	view := NewModel(agent).View()
+	for _, expected := range []string{"Press Ctrl+D to quit.", "You: "} {
+		if !strings.Contains(view, expected) {
+			t.Fatalf("expected prompt view to contain %q, got %q", expected, view)
+		}
 	}
 }

@@ -58,3 +58,10 @@ Run it after the red test is written, after the implementation, and before stagi
 
 Do not substitute `go build` unless the user asks for it.
 
+## Formatting
+
+Use `gofumpt`, not `gofmt`, for Go formatting.
+
+```bash
+direnv exec . gofumpt -w <go files>
+```

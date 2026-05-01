@@ -34,7 +34,7 @@ Use `direnv exec .` for Go commands, formatting, and tests.
 Examples:
 
 ```bash
-direnv exec . gofmt -w internal/chat/agent.go
+direnv exec . gofumpt -w internal/chat/agent.go
 direnv exec . go test ./...
 ```
 
@@ -43,4 +43,3 @@ For this project, the default verification command is:
 ```bash
 direnv exec . go test ./...
 ```
-

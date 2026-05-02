@@ -33,6 +33,11 @@ func NewAgent(systemPrompt string, provider Provider) Agent {
 	}
 }
 
+func WithProvider(agent Agent, provider Provider) Agent {
+	agent.provider = provider
+	return agent
+}
+
 func Ask(agent Agent, text string) (Agent, error) {
 	if agent.provider == nil {
 		return agent, errors.New("chat provider is required")

@@ -7,7 +7,9 @@
     "gofumpt@latest",
     "golangci-lint@latest",
     "gotools@latest",
-    "git-ps-rs@latest"
+    "git-ps-rs@latest",
+    "_1password@latest",
+    "claude-agent-acp@0.21.0"
   ],
   "shell": {
     "init_hook": [

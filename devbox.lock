@@ -1,6 +1,102 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "_1password@latest": {
+      "last_modified": "2024-10-26T22:05:23Z",
+      "resolved": "github:NixOS/nixpkgs/86e78d3d2084ff87688da662cf78c2af085d8e73#_1password",
+      "source": "devbox-search",
+      "version": "2.30.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mmrryhcr5v1addp6xwwdyk3mj9a2dnff-1password-cli-2.30.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mmrryhcr5v1addp6xwwdyk3mj9a2dnff-1password-cli-2.30.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/b6m30bgb4vfd573zxn4iwl7ziv8zf0f4-1password-cli-2.30.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/b6m30bgb4vfd573zxn4iwl7ziv8zf0f4-1password-cli-2.30.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8w5afy7pjciq84mxa6gjplrjnak8qaij-1password-cli-2.30.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8w5afy7pjciq84mxa6gjplrjnak8qaij-1password-cli-2.30.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/r7n8qm9ws7xh9vzqd8zp9cswmcp071y8-1password-cli-2.30.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/r7n8qm9ws7xh9vzqd8zp9cswmcp071y8-1password-cli-2.30.0"
+        }
+      }
+    },
+    "claude-agent-acp@0.21.0": {
+      "last_modified": "2026-04-23T13:07:47Z",
+      "resolved": "github:NixOS/nixpkgs/01fbdeef22b76df85ea168fbfe1bfd9e63681b30#claude-agent-acp",
+      "source": "devbox-search",
+      "version": "0.21.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zbwlw7ykhs3dlmz2awf12ni6zwjhzjvz-claude-agent-acp-0.21.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zbwlw7ykhs3dlmz2awf12ni6zwjhzjvz-claude-agent-acp-0.21.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kbx4qcjiki6kjkfg4zp7cdbngdxwp5jd-claude-agent-acp-0.21.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/kbx4qcjiki6kjkfg4zp7cdbngdxwp5jd-claude-agent-acp-0.21.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0s1v3d10yl2jmikb52f53g3cy735r1xn-claude-agent-acp-0.21.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0s1v3d10yl2jmikb52f53g3cy735r1xn-claude-agent-acp-0.21.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/cfg0qq4gw1j5dzbvksfx0cqg9wpsjf9s-claude-agent-acp-0.21.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/cfg0qq4gw1j5dzbvksfx0cqg9wpsjf9s-claude-agent-acp-0.21.0"
+        }
+      }
+    },
     "git-ps-rs@latest": {
       "last_modified": "2026-04-23T13:07:47Z",
       "resolved": "github:NixOS/nixpkgs/01fbdeef22b76df85ea168fbfe1bfd9e63681b30#git-ps-rs",

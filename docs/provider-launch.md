@@ -6,7 +6,7 @@ The prototype should treat ACP as the integration layer, but it must not assume 
 
 | Provider | Spike startup path | Finding for requirements |
 | --- | --- | --- |
-| Claude | `claude-code-acp` or `npx -y @zed-industries/claude-code-acp@latest` | Claude is reached through an ACP wrapper around the local Claude CLI. It must not use the direct Anthropic API path. |
+| Claude | `claude-agent-acp` from devbox | Claude is reached through the supported ACP wrapper package. `.envrc` provides `ANTHROPIC_API_KEY` through 1Password for the wrapper. |
 | Copilot | `copilot --acp --stdio` | Copilot exposes ACP through the installed Copilot CLI over stdio. |
 | Codex | `codex-acp` | Codex is reached through an ACP wrapper around the local Codex CLI. |
 
@@ -28,4 +28,3 @@ The provider configuration should eventually include:
 - whether the provider is native ACP or an ACP wrapper
 
 The first terminal chat iteration can keep this static, but the boundary should be ready for real provider commands.
-

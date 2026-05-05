@@ -6,7 +6,8 @@ Feature: Minimal terminal chat prototype
   # REQ(#1)
   Scenario: Respond to any user input with the PoC response
     Given the terminal chat application is running
-    When the user enters "hello"
+    When the user types "hello"
+    And the user submits the prompt
     Then the terminal chat should render "You: hello"
     And the terminal chat should render "I don't understand."
 

@@ -5,6 +5,7 @@ go 1.26.2
 require (
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
+	github.com/coder/acp-go-sdk v0.12.0
 	github.com/cucumber/godog v0.15.1
 )
 

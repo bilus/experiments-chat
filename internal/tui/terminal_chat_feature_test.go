@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bilus/experiments-chat/internal/buf"
 	"github.com/bilus/experiments-chat/internal/chat"
 	"github.com/bilus/experiments-chat/internal/tui"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,8 +17,10 @@ import (
 )
 
 const (
-	programStartTimeout = 50 * time.Millisecond
-	programStopTimeout  = time.Second
+	claudeReadyMessage   = "Claude is ready."
+	programStartTimeout  = 50 * time.Millisecond
+	programStopTimeout   = time.Second
+	providerReadyTimeout = 30 * time.Second
 )
 
 type programResult struct {
@@ -48,6 +51,7 @@ type terminalChatFeature struct {
 	done    chan programResult
 	input   *testInput
 	model   tui.Model
+	output  buf.Buffer
 }
 
 func (f *terminalChatFeature) reset() {
@@ -63,6 +67,14 @@ func (f *terminalChatFeature) cleanup() {
 	program := f.program
 	done := f.done
 	input := f.input
+
+	f.quitProgram()
+	select {
+	case result := <-done:
+		_ = f.storeProgramResult(result)
+		return
+	case <-time.After(programStopTimeout):
+	}
 
 	program.Kill()
 	if input != nil {
@@ -99,6 +111,9 @@ func (f *terminalChatFeature) storeProgramResult(result programResult) error {
 	}
 
 	f.model = model
+	if err := f.model.Close(); err != nil {
+		return fmt.Errorf("close terminal chat model: %w", err)
+	}
 	return nil
 }
 
@@ -119,9 +134,17 @@ func (f *terminalChatFeature) captureFinalModel(timeoutMessage string) error {
 	}
 }
 
+func (f *terminalChatFeature) quitProgram() {
+	if f.program == nil {
+		return
+	}
+
+	f.program.Send(tea.KeyMsg{Type: tea.KeyCtrlD})
+}
+
 func (f *terminalChatFeature) renderedView() (string, error) {
 	if f.program != nil {
-		f.program.Quit()
+		f.quitProgram()
 		if err := f.captureFinalModel("terminal chat did not exit while capturing rendered output"); err != nil {
 			return "", err
 		}
@@ -130,11 +153,59 @@ func (f *terminalChatFeature) renderedView() (string, error) {
 	return f.model.View(), nil
 }
 
+func (f *terminalChatFeature) renderedOutput() (string, error) {
+	if f.program != nil {
+		f.quitProgram()
+		if err := f.captureFinalModel("terminal chat did not exit while capturing rendered output"); err != nil {
+			return "", err
+		}
+	}
+
+	return f.output.String(), nil
+}
+
+func (f *terminalChatFeature) waitForOutput(expected string) error {
+	deadline := time.After(providerReadyTimeout)
+	tick := time.NewTicker(10 * time.Millisecond)
+	defer tick.Stop()
+
+	for {
+		if strings.Contains(f.output.String(), expected) {
+			return nil
+		}
+
+		select {
+		case result := <-f.done:
+			if err := f.storeProgramResult(result); err != nil {
+				return fmt.Errorf("terminal chat exited while waiting for %q: %w", expected, err)
+			}
+
+			return fmt.Errorf("terminal chat exited before rendering %q; output: %q", expected, f.output.String())
+		case <-deadline:
+			return fmt.Errorf("timed out waiting for %q; output: %q", expected, f.output.String())
+		case <-tick.C:
+		}
+	}
+}
+
 func (f *terminalChatFeature) theTerminalChatApplicationIsRunning() error {
 	provider := chat.StaticProvider{Response: "I don't understand."}
-	f.model = tui.NewModel(chat.NewAgent("", provider))
+	return f.startTerminalChat(tui.NewModel(chat.NewAgent("", provider)))
+}
+
+func (f *terminalChatFeature) claudeIsTheSelectedProvider() error {
+	f.model = tui.NewWithClaude()
+	return nil
+}
+
+func (f *terminalChatFeature) theTerminalChatApplicationStarts() error {
+	return f.startTerminalChat(f.model)
+}
+
+func (f *terminalChatFeature) startTerminalChat(model tui.Model) error {
+	f.model = model
 	input := newTestInput()
-	program := tea.NewProgram(f.model, tea.WithInput(input.reader), tea.WithoutRenderer())
+	program := tea.NewProgram(f.model, tea.WithInput(input.reader), tea.WithOutput(&f.output))
 	done := make(chan programResult, 1)
 
 	f.program = program
@@ -156,6 +227,23 @@ func (f *terminalChatFeature) theTerminalChatApplicationIsRunning() error {
 	case <-time.After(programStartTimeout):
 		return nil
 	}
+}
+
+func (f *terminalChatFeature) connectionToClaudeIsSuccessful() error {
+	return f.waitForOutput(claudeReadyMessage)
+}
+
+func (f *terminalChatFeature) theSystemShouldIndicateReadiness() error {
+	output, err := f.renderedOutput()
+	if err != nil {
+		return err
+	}
+
+	if !strings.Contains(output, claudeReadyMessage) {
+		return fmt.Errorf("expected terminal chat output to contain %q, got %q", claudeReadyMessage, output)
+	}
+
+	return nil
 }
 
 func (f *terminalChatFeature) theTerminalChatShouldShow(expected string) error {
@@ -180,7 +268,7 @@ func (f *terminalChatFeature) sendKey(key tea.KeyType) error {
 	return nil
 }
 
-func (f *terminalChatFeature) theUserTypes(text string) error {
+func (f *terminalChatFeature) sendText(text string) error {
 	if f.program == nil {
 		return fmt.Errorf("terminal chat application is not running")
 	}
@@ -189,13 +277,8 @@ func (f *terminalChatFeature) theUserTypes(text string) error {
 	return nil
 }
 
-func (f *terminalChatFeature) theUserEnters(text string) error {
-	if f.program == nil {
-		return fmt.Errorf("terminal chat application is not running")
-	}
-
-	f.program.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(text)})
-	return f.theUserSubmitsThePrompt()
+func (f *terminalChatFeature) theUserTypes(text string) error {
+	return f.sendText(text)
 }
 
 func (f *terminalChatFeature) theUserPressesLeftArrow() error {
@@ -207,21 +290,11 @@ func (f *terminalChatFeature) theUserPressesBackspace() error {
 }
 
 func (f *terminalChatFeature) theUserSubmitsThePrompt() error {
-	if f.program == nil {
-		return fmt.Errorf("terminal chat application is not running")
-	}
-
-	f.program.Send(tea.KeyMsg{Type: tea.KeyEnter})
-	return nil
+	return f.sendKey(tea.KeyEnter)
 }
 
 func (f *terminalChatFeature) theUserPressesCtrlD() error {
-	if f.program == nil {
-		return fmt.Errorf("terminal chat application is not running")
-	}
-
-	f.program.Send(tea.KeyMsg{Type: tea.KeyCtrlD})
-	return nil
+	return f.sendKey(tea.KeyCtrlD)
 }
 
 func (f *terminalChatFeature) theTerminalChatShouldExit() error {
@@ -256,7 +329,10 @@ func TestFeatures(t *testing.T) {
 			})
 
 			sc.Step(`^the terminal chat application is running$`, feature.theTerminalChatApplicationIsRunning)
-			sc.Step(`^the user enters "([^"]*)"$`, feature.theUserEnters)
+			sc.Step(`^Claude is the selected provider$`, feature.claudeIsTheSelectedProvider)
+			sc.Step(`^the terminal chat application starts$`, feature.theTerminalChatApplicationStarts)
+			sc.Step(`^connection to Claude is successful$`, feature.connectionToClaudeIsSuccessful)
+			sc.Step(`^the system should indicate readiness$`, feature.theSystemShouldIndicateReadiness)
 			sc.Step(`^the user types "([^"]*)"$`, feature.theUserTypes)
 			sc.Step(`^the user presses Left Arrow$`, feature.theUserPressesLeftArrow)
 			sc.Step(`^the user presses Backspace$`, feature.theUserPressesBackspace)

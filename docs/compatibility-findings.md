@@ -30,6 +30,7 @@ Source artifacts:
 ## Important Provider Deviations
 
 - Claude reached the baseline through the ACP wrapper over the local Claude CLI.
+- The terminal chat prototype now uses the supported `claude-agent-acp` devbox package instead of the older spike wrapper path.
 - Copilot resume can report that a session is already loaded. Treat this as an adaptation case, not an automatic hard failure.
 - Copilot command execution may be blocked by approval. The UI and logs should surface this clearly.
 - Codex completed baseline edits and tests, but in one run the follow-up repeated the first response. Requirements should not assume perfect answer quality from ACP compatibility alone.
